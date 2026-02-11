@@ -1,1 +1,4 @@
 .gradio
+.env
+.secrets
+.secrets.template
