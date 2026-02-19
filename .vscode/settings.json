@@ -1,0 +1,8 @@
+{
+  "python.defaultInterpreterPath": "/Users/darko-adm/work/dsi/deploying-ai-env/bin/python",
+  "python.terminal.activateEnvironment": true,
+  "python.envFile": "${workspaceFolder}/.env",
+  "terminal.integrated.env.osx": {
+    "PYTHONPATH": "${workspaceFolder}/05_src"
+  }
+}
