@@ -4,13 +4,13 @@ import gradio as gr
 from fastapi import FastAPI
 import uvicorn
 from prompts import APPNAME, HELPME
-from app import init_or_load_collection, chat_handler
+from econapp import init_or_load_collection, chat_handler
 
 # build the gradio app
 def build_gradio_app():
     collection = init_or_load_collection()
 
-    with gr.Blocks(title=APPNAME) as econaiapp:
+    with gr.Blocks(title=APPNAME) as econchatapp:
         gr.Markdown(f"# {APPNAME}\n\n{HELPME}")
 
         state = gr.State({})
@@ -24,17 +24,18 @@ def build_gradio_app():
             type="messages",
         )
 
-    return econaiapp
+    return econchatapp
 
 # main runner
+# this should run on http://127.0.0.1:8000/econapp
 def main():
     demo = build_gradio_app()
     api = FastAPI()
     # run add at url 
-    api = gr.mount_gradio_app(api, demo, path="/econedu")
+    api = gr.mount_gradio_app(api, demo, path="/econapp")
     # run on local port 8000
     uvicorn.run(api, host="127.0.0.1", port=8000)
-    # this should run on http://127.0.0.1:8000/econedu
+    
 
 
 if __name__ == "__main__":

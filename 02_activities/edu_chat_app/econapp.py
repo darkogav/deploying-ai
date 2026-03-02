@@ -120,16 +120,49 @@ def openalex_citations(name):
 
     top = results[0]
     display_name = top.get("display_name", name)
-    works = top.get("works_count")
+    
+    works_count = top.get("works_count")
+    
     cited_by = top.get("cited_by_count")
+    
+    author_id = top.get("id", "")
+    if isinstance(author_id, str) and "/" in author_id:
+        author_id = author_id.rsplit("/", 1)[-1]
 
-    # change output from json 
-    parts = [f"OpenAlex top match: {display_name}."]
-    if works is not None:
-        parts.append(f"Works indexed: {works}.")
+    # get citations for user search 
+    parts = [f"Citations found for: {display_name}."]
+
+    # get total citations found.
+    if works_count is not None:
+        parts.append(f"Works indexed: {works_count}.")
+
+    # get total times cited? (is this useful?)
     if cited_by is not None:
-        parts.append(f"Citations (cited-by count): {cited_by}.")
-    parts.append("Note: name matching can be imperfect.")
+        parts.append(f"Citations count: {cited_by}.")
+
+    # not not aithor add space
+    if not author_id:
+        return " ".join(parts)
+
+    # formating citations 
+    works_url = "https://api.openalex.org/works"
+    works_params = {"filter": f"author.id:{author_id}", "per-page": 10}
+    wr = requests.get(works_url, params=works_params, timeout=20)
+    wr.raise_for_status()
+    works_data = wr.json()
+    work_list = works_data.get("results", [])
+
+    # return results from openalex json to display
+    if work_list:
+        parts.append("\n\nPapers (title, year, co-authors):")
+        for w in work_list:
+            title = w.get("title") or w.get("display_name") or "(no title)"
+            year = w.get("publication_year") or "n.d."
+            authorships = w.get("authorships") or []
+            co_authors = [a.get("author", {}).get("display_name", "") for a in authorships if a.get("author")]
+            co_authors = [c for c in co_authors if c]
+            co_str = ", ".join(co_authors) if co_authors else "—"
+            parts.append(f"\n• {title} ({year}). Co-authors: {co_str}")
 
     return " ".join(parts)
 
